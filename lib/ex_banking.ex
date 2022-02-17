@@ -30,9 +30,17 @@ defmodule ExBanking do
   Returns new_balance of the user in given format
   """
   @spec deposit(user(), amount(), currency()) :: {:ok, balance()} | {:error, :wrong_arguments | :user_does_not_exist | :too_many_requests_to_user}
-  def deposit(user, amount, currency) do
-    {:ok, amount}
+  def deposit("", _amount, _currency), do: {:error, :wrong_arguments}
+  def deposit(_user, _amount, ""), do: {:error, :wrong_arguments}
+  def deposit(_user, amount, _currency) when amount <= 0.0, do:
+    {:error, :wrong_arguments}
+  def deposit(user, amount, currency) 
+    when is_binary(user) 
+      and is_binary(currency) 
+      and is_float(amount) do
+    UserSrv.deposit(user, amount, currency)
   end
+  def deposit(_user, _amount, _currency), do: {:error, :wrong_arguments}
 
 
   @doc """

@@ -12,6 +12,20 @@ defmodule ExBanking.UserSrv do
     GenServer.start_link(__MODULE__, [user])
   end
 
+  @spec deposit(ExBanking.user(), ExBanking.amount(), ExBanking.currency()) 
+    :: {:ok, ExBanking.amount()} 
+      | {:error, atom()}
+  def deposit(user, amount, currency) do
+    case  :ets.lookup(:users, user) do
+      [] ->
+        {:error, :user_does_not_exist}
+      [{^user, pid, counter}] when counter <= 10 ->
+        {:ok, GenServer.call(pid, {:deposit, currency, amount})}
+      [{_user, _pid, _counter}] ->
+        {:error, :too_many_requests_to_user}
+    end
+  end
+
   @spec get_balance(ExBanking.user(), ExBanking.currency()) 
     :: {:ok, ExBanking.amount()} 
       | {:error, atom()}
@@ -20,7 +34,7 @@ defmodule ExBanking.UserSrv do
       [] ->
         {:error, :user_does_not_exist}
       [{^user, pid, counter}] when counter <= 10 ->
-          GenServer.call(pid, {:balance, currency})
+        {:ok, GenServer.call(pid, {:balance, currency})}
       [{_user, _pid, _counter}] ->
         {:error, :too_many_requests_to_user}
     end
@@ -36,6 +50,11 @@ defmodule ExBanking.UserSrv do
   end
 
   @impl true
+  def handle_call({:deposit, currency, amount}, _from, %{balances: balances} = state) do
+    balances = Map.update(balances, currency, amount, fn am -> am + amount end)
+    {:reply, Map.get(balances, currency, 0.0), %{state | balances: balances}}
+  end
+
   def handle_call({:balance, currency}, _from, %{balances: balances} = state), do:
     {:reply, Map.get(balances, currency, 0.0), state}
 
