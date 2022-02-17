@@ -3,6 +3,8 @@ defmodule ExBanking do
   Simple banking application
   """
 
+  alias ExBanking.{UsersSup, UserSrv}
+
   @type user() :: String.t()
   @type currency() :: String.t()
   @type balance() :: float()
@@ -14,7 +16,15 @@ defmodule ExBanking do
   with 0.0 balance for any currency
   """
   @spec create_user(user()) :: :ok | {:error, :wrong_arguments | :user_already_exists}
-  def create_user(user), do: :ok
+  def create_user(user) when is_binary(user) and user != "" do
+    case UsersSup.add_user(user) do
+      {:ok, _} ->
+        :ok
+      _ -> 
+        {:error, :user_already_exists}
+    end
+  end
+  def create_user(_), do: {:error, :wrong_arguments}
 
   @doc """
   Returns new_balance of the user in given format
