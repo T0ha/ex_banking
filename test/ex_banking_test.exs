@@ -226,4 +226,66 @@ defmodule ExBankingTest do
 
     assert ExBanking.send(user, user1, amount, currency) == {:error, :receiver_does_not_exist}
   end
+
+  test "too_many_requests_to_user error" do
+    user = Faker.Internet.user_name() 
+    user1 = Faker.Internet.user_name() 
+    amount = Faker.Commerce.price()
+    currency = Faker.Currency.code() 
+
+    assert ExBanking.create_user(user) == :ok
+
+    num = Faker.Random.Elixir.random_between(10, 20)
+    this = self()
+    for _ <- 0..num do
+      spawn(fn ->
+        ret = ExBanking.deposit(user, amount, currency)
+        send(this, ret)
+      end)
+    end
+    resps = for _ <- 0..num do
+      receive do
+        ret -> ret
+      after 
+        1000 -> :ok
+      end
+    end
+    assert Enum.any?(resps, &(&1 == {:error, :too_many_requests_to_user}))
+  end
+
+  test "too_many_requests_to_sender error" do
+    user = Faker.Internet.user_name() 
+    user1 = Faker.Internet.user_name() 
+    amount = Faker.Commerce.price()
+    currency = Faker.Currency.code() 
+
+    assert ExBanking.create_user(user) == :ok
+    assert ExBanking.create_user(user1) == :ok
+
+    num = Faker.Random.Elixir.random_between(10, 20)
+    total_amount = Float.round(amount * (num + 1), 2)
+
+    {:ok, _} = ExBanking.deposit(user, total_amount, currency)
+
+    this = self()
+    for _ <- 0..num do
+      spawn(fn ->
+        ret = ExBanking.send(user, user1, amount, currency)
+        send(this, ret)
+      end)
+    end
+    resps = for _ <- 0..num do
+      receive do
+        ret -> ret
+      after 
+        1000 -> :ok
+      end
+    end
+    assert Enum.any?(resps, &(&1 == {:error, :too_many_requests_to_sender}))
+
+    {:ok, balance} = ExBanking.get_balance(user, currency)
+    {:ok, balance1} = ExBanking.get_balance(user1, currency)
+
+    assert Float.round(balance + balance1, 2) == total_amount
+  end
 end
