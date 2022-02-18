@@ -1,13 +1,13 @@
 defmodule ExBanking.UsersSup do
   use DynamicSupervisor
 
-  def start_link(_), do:
-    DynamicSupervisor.start_link(__MODULE__, [], name: __MODULE__)
+  def start_link(_), do: DynamicSupervisor.start_link(__MODULE__, [], name: __MODULE__)
 
   def add_user(user) do
     case :ets.lookup(:users, user) do
       [] ->
         DynamicSupervisor.start_child(__MODULE__, {ExBanking.UserSrv, user})
+
       [_] ->
         {:error, :user_already_exists}
     end
