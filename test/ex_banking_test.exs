@@ -3,14 +3,14 @@ defmodule ExBankingTest do
   doctest ExBanking
 
   test "create new user works" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     assert ExBanking.create_user(user) == :ok
-    user1 = Faker.Internet.user_name() 
+    user1 = Faker.Internet.user_name()
     assert ExBanking.create_user(user1) == :ok
   end
 
   test "create 2 users with the same name returns error" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     assert ExBanking.create_user(user) == :ok
     assert ExBanking.create_user(user) == {:error, :user_already_exists}
   end
@@ -22,11 +22,11 @@ defmodule ExBankingTest do
   end
 
   test "deposit works" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
     amount1 = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
-    currency1 = Faker.Currency.code() 
+    currency = Faker.Currency.code()
+    currency1 = Faker.Currency.code()
     total_amount = Float.round(amount + amount1, 2)
 
     assert ExBanking.create_user(user) == :ok
@@ -39,9 +39,9 @@ defmodule ExBankingTest do
   end
 
   test "deposit returns error for wrong arguments" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
 
     assert ExBanking.create_user(user) == :ok
 
@@ -56,19 +56,19 @@ defmodule ExBankingTest do
   end
 
   test "deposit returns error for non exising user" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
 
     assert ExBanking.deposit(user, amount, currency) == {:error, :user_does_not_exist}
   end
 
   test "withdraw works" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
     amount1 = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
-    currency1 = Faker.Currency.code() 
+    currency = Faker.Currency.code()
+    currency1 = Faker.Currency.code()
     total_amount = Float.round(amount + amount1, 2)
 
     assert ExBanking.create_user(user) == :ok
@@ -83,10 +83,10 @@ defmodule ExBankingTest do
   end
 
   test "withdraw returns error for wrong arguments" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
     amount1 = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
     total_amount = Float.round(amount + amount1, 2)
 
     assert ExBanking.create_user(user) == :ok
@@ -103,18 +103,18 @@ defmodule ExBankingTest do
   end
 
   test "withdraw returns error for non exising user" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
 
     assert ExBanking.withdraw(user, amount, currency) == {:error, :user_does_not_exist}
   end
 
   test "withdraw returns error for not enough money" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
     amount1 = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
 
     assert ExBanking.create_user(user) == :ok
     assert ExBanking.deposit(user, amount, currency) == {:ok, amount}
@@ -123,11 +123,11 @@ defmodule ExBankingTest do
   end
 
   test "get_balance works" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
     amount1 = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
-    currency1 = Faker.Currency.code() 
+    currency = Faker.Currency.code()
+    currency1 = Faker.Currency.code()
     total_amount = Float.round(amount + amount1, 2)
 
     assert currency != currency1
@@ -137,15 +137,14 @@ defmodule ExBankingTest do
 
     assert ExBanking.get_balance(user, currency) == {:ok, total_amount}
 
-
     assert ExBanking.get_balance(user, currency1) == {:ok, amount}
   end
 
   test "get_balance returns error for wrong arguments" do
-    user = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
     amount1 = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
     total_amount = Float.round(amount + amount1, 2)
 
     assert ExBanking.create_user(user) == :ok
@@ -159,18 +158,18 @@ defmodule ExBankingTest do
   end
 
   test "get_balance returns error for non exising user" do
-    user = Faker.Internet.user_name() 
-    currency = Faker.Currency.code() 
+    user = Faker.Internet.user_name()
+    currency = Faker.Currency.code()
 
     assert ExBanking.get_balance(user, currency) == {:error, :user_does_not_exist}
   end
 
   test "send works" do
-    user = Faker.Internet.user_name() 
-    user1 = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
+    user1 = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
     amount1 = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
     total_amount = Float.round(amount + amount1, 2)
 
     assert ExBanking.create_user(user) == :ok
@@ -181,17 +180,18 @@ defmodule ExBankingTest do
 
     assert ExBanking.send(user, user1, amount, currency) == {:ok, amount1, total_amount}
 
-    assert ExBanking.send(user, user1, amount1, currency) == {:ok, 0.0, Float.round(2 * amount1 + amount, 2)}
+    assert ExBanking.send(user, user1, amount1, currency) ==
+             {:ok, 0.0, Float.round(2 * amount1 + amount, 2)}
 
     assert ExBanking.send(user1, user, amount1, currency) == {:ok, total_amount, amount1}
   end
 
   test "send returns error for wrong arguments" do
-    user = Faker.Internet.user_name() 
-    user1 = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
+    user1 = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
     amount1 = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
     total_amount = Float.round(amount + amount1, 2)
 
     assert ExBanking.create_user(user) == :ok
@@ -214,10 +214,10 @@ defmodule ExBankingTest do
   end
 
   test "send returns error for non exising user" do
-    user = Faker.Internet.user_name() 
-    user1 = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
+    user1 = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
 
     assert ExBanking.send(user, user1, amount, currency) == {:error, :sender_does_not_exist}
 
@@ -228,36 +228,40 @@ defmodule ExBankingTest do
   end
 
   test "too_many_requests_to_user error" do
-    user = Faker.Internet.user_name() 
-    user1 = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
+    user1 = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
 
     assert ExBanking.create_user(user) == :ok
 
     num = Faker.Random.Elixir.random_between(10, 20)
     this = self()
+
     for _ <- 0..num do
       spawn(fn ->
         ret = ExBanking.deposit(user, amount, currency)
         send(this, ret)
       end)
     end
-    resps = for _ <- 0..num do
-      receive do
-        ret -> ret
-      after 
-        1000 -> :ok
+
+    resps =
+      for _ <- 0..num do
+        receive do
+          ret -> ret
+        after
+          1000 -> :ok
+        end
       end
-    end
+
     assert Enum.any?(resps, &(&1 == {:error, :too_many_requests_to_user}))
   end
 
   test "too_many_requests_to_sender error" do
-    user = Faker.Internet.user_name() 
-    user1 = Faker.Internet.user_name() 
+    user = Faker.Internet.user_name()
+    user1 = Faker.Internet.user_name()
     amount = Faker.Commerce.price()
-    currency = Faker.Currency.code() 
+    currency = Faker.Currency.code()
 
     assert ExBanking.create_user(user) == :ok
     assert ExBanking.create_user(user1) == :ok
@@ -268,20 +272,70 @@ defmodule ExBankingTest do
     {:ok, _} = ExBanking.deposit(user, total_amount, currency)
 
     this = self()
+
     for _ <- 0..num do
       spawn(fn ->
         ret = ExBanking.send(user, user1, amount, currency)
         send(this, ret)
       end)
     end
-    resps = for _ <- 0..num do
-      receive do
-        ret -> ret
-      after 
-        1000 -> :ok
+
+    resps =
+      for _ <- 0..num do
+        receive do
+          ret -> ret
+        after
+          1000 -> :ok
+        end
       end
-    end
+
     assert Enum.any?(resps, &(&1 == {:error, :too_many_requests_to_sender}))
+
+    {:ok, balance} = ExBanking.get_balance(user, currency)
+    {:ok, balance1} = ExBanking.get_balance(user1, currency)
+
+    assert Float.round(balance + balance1, 2) == total_amount
+  end
+
+  test "too_many_requests_to_receiver error" do
+    user = Faker.Internet.user_name()
+    user1 = Faker.Internet.user_name()
+    amount = Faker.Commerce.price()
+    currency = Faker.Currency.code()
+
+    assert ExBanking.create_user(user) == :ok
+    assert ExBanking.create_user(user1) == :ok
+
+    num = Faker.Random.Elixir.random_between(4, 9)
+    total_amount = Float.round(amount * (num + 1), 2)
+
+    {:ok, _} = ExBanking.deposit(user, total_amount, currency)
+
+    this = self()
+
+    for _ <- 0..num do
+      spawn(fn ->
+        ret = ExBanking.send(user, user1, amount, currency)
+        send(this, ret)
+      end)
+      spawn(fn ->
+        ExBanking.get_balance(user1, currency)
+      end)
+      spawn(fn ->
+        ExBanking.get_balance(user1, currency)
+      end)
+    end
+
+    resps =
+      for _ <- 0..num do
+        receive do
+          ret -> ret
+        after
+          1000 -> :ok
+        end
+      end
+
+    assert Enum.any?(resps, &(&1 == {:error, :too_many_requests_to_receiver}))
 
     {:ok, balance} = ExBanking.get_balance(user, currency)
     {:ok, balance1} = ExBanking.get_balance(user1, currency)
