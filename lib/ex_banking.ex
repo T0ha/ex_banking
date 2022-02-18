@@ -77,7 +77,35 @@ defmodule ExBanking do
   @doc """
   """
   @spec send(user(), user(), amount(), currency()) :: {:ok, balance(), balance()} | {:error, :wrong_arguments | :not_enough_money | :sender_does_not_exist | :receiver_does_not_exist | :too_many_requests_to_sender | :too_many_requests_to_receiver}
-  def send(from_user, to_user, amount, currency) do
-    {:ok, 0.0, amount}
+  def send("", _to_user, _amount, _currency), do: {:error, :wrong_arguments}
+  def send(_from_user, "", _amount, _currency), do: {:error, :wrong_arguments}
+
+  def send(_from_user, _to_user, _amount, ""), do: {:error, :wrong_arguments}
+
+  def send(_from_user, _to_user, amount, _currency) when amount <= 0.0, do:
+    {:error, :wrong_arguments}
+  def send(_from_user, _to_user, amount, _currency) when amount <= 0.0, do:
+    {:error, :wrong_arguments}
+  def send(from_user, to_user, amount, currency)
+    when is_binary(from_user)
+      and is_binary(to_user)
+      and is_binary(currency)
+      and is_float(amount) do
+    with {:from, {:ok, from_balance}} <- {:from, UserSrv.withdraw(from_user, amount, currency)},
+      {:to, {:ok, to_balance}} <- {:to, UserSrv.deposit(to_user, amount, currency)} do
+      {:ok, from_balance, to_balance}
+    else
+      {:from, {:error, :user_does_not_exist}} -> {:error, :sender_does_not_exist}
+      {:to, {:error, :user_does_not_exist}} -> 
+        UserSrv.deposit(from_user, amount, currency)
+        {:error, :receiver_does_not_exist}
+      {:from, {:error, :too_many_requests_to_user}} -> {:error, :too_many_requests_to_sender}
+      {:to, {:error, :too_many_requests_to_user}} ->
+        UserSrv.deposit(from_user, amount, currency)
+        {:error, :too_many_requests_to_receiver}
+      {_, {:error, _} = err} -> err
+    end
   end
+  def send(_from_user, _to_user, _amount, _currency), do:
+    {:error, :wrong_arguments}
 end
