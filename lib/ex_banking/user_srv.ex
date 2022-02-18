@@ -40,6 +40,20 @@ defmodule ExBanking.UserSrv do
     end
   end
 
+  @spec withdraw(ExBanking.user(), ExBanking.amount(), ExBanking.currency()) 
+    :: {:ok, ExBanking.amount()} 
+      | {:error, atom()}
+  def withdraw(user, amount, currency) do
+    case  :ets.lookup(:users, user) do
+      [] ->
+        {:error, :user_does_not_exist}
+      [{^user, pid, counter}] when counter <= 10 ->
+        {:ok, GenServer.call(pid, {:withdraw, currency, amount})}
+      [{_user, _pid, _counter}] ->
+        {:error, :too_many_requests_to_user}
+    end
+  end
+
   @impl true
   def init([user]) do
     :ets.insert(:users, {user, self(), 0})
@@ -57,6 +71,11 @@ defmodule ExBanking.UserSrv do
 
   def handle_call({:balance, currency}, _from, %{balances: balances} = state), do:
     {:reply, Map.get(balances, currency, 0.0), state}
+
+  def handle_call({:withdraw, currency, amount}, _from, %{balances: balances} = state) do
+    balances = Map.update(balances, currency, amount, fn am -> am - amount end)
+    {:reply, Map.get(balances, currency, 0.0), %{state | balances: balances}}
+  end
 
   def handle_call(req, _from, state) do
     Logger.warn("Wrong call #{req} to #{__MODULE__} state #{inspect state}")

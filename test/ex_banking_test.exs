@@ -64,6 +64,7 @@ defmodule ExBankingTest do
     assert ExBanking.deposit(user, amount, currency) == {:error, :user_does_not_exist}
   end
 
+  @tag :skip
   test "withdraw works" do
     user = Faker.Internet.user_name() 
     amount = Faker.Commerce.price()
@@ -82,6 +83,7 @@ defmodule ExBankingTest do
     assert ExBanking.withdraw(user, amount1, currency1) == {:ok, amount}
   end
 
+  @tag :skip
   test "withdraw returns error for wrong arguments" do
     user = Faker.Internet.user_name() 
     amount = Faker.Commerce.price()
@@ -101,6 +103,7 @@ defmodule ExBankingTest do
     assert ExBanking.withdraw(user, amount, "") == {:error, :wrong_arguments}
   end
 
+  @tag :skip
   test "withdraw returns error for non exising user" do
     user = Faker.Internet.user_name() 
     amount = Faker.Commerce.price()
@@ -109,6 +112,7 @@ defmodule ExBankingTest do
     assert ExBanking.withdraw(user, amount, currency) == {:error, :user_does_not_exist}
   end
 
+  @tag :skip
   test "withdraw returns error for not enough money" do
     user = Faker.Internet.user_name() 
     amount = Faker.Commerce.price()
@@ -130,14 +134,15 @@ defmodule ExBankingTest do
 
     assert ExBanking.create_user(user) == :ok
     assert ExBanking.deposit(user, amount + amount1, currency) == {:ok, amount + amount1}
-    assert ExBanking.deposit(user, amount, currency1) == {:ok, amount + amount1}
+    assert ExBanking.deposit(user, amount, currency1) == {:ok, amount}
 
     assert ExBanking.get_balance(user, currency) == {:ok, amount + amount1}
 
 
-    assert ExBanking.get_balance(user, currency1) == {:ok, amount1}
+    assert ExBanking.get_balance(user, currency1) == {:ok, amount}
   end
 
+  @tag :skip
   test "get_balance returns error for wrong arguments" do
     user = Faker.Internet.user_name() 
     amount = Faker.Commerce.price()
@@ -154,6 +159,7 @@ defmodule ExBankingTest do
     assert ExBanking.get_balance(user, "") == {:error, :wrong_arguments}
   end
 
+  @tag :skip
   test "get_balance returns error for non exising user" do
     user = Faker.Internet.user_name() 
     currency = Faker.Currency.symbol() 
@@ -161,6 +167,7 @@ defmodule ExBankingTest do
     assert ExBanking.get_balance(user, currency) == {:error, :user_does_not_exist}
   end
 
+  @tag :skip
   test "send works" do
     user = Faker.Internet.user_name() 
     user1 = Faker.Internet.user_name() 
@@ -181,6 +188,7 @@ defmodule ExBankingTest do
     assert ExBanking.send(user1, user, amount1, currency) == {:ok, amount1, amount + amount1}
   end
 
+  @tag :skip
   test "send returns error for wrong arguments" do
     user = Faker.Internet.user_name() 
     user1 = Faker.Internet.user_name() 
@@ -207,6 +215,7 @@ defmodule ExBankingTest do
     assert ExBanking.send(user, user1, amount, "") == {:error, :wrong_arguments}
   end
 
+  @tag :skip
   test "send returns error for non exising user" do
     user = Faker.Internet.user_name() 
     user1 = Faker.Internet.user_name() 

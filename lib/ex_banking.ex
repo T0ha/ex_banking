@@ -48,8 +48,12 @@ defmodule ExBanking do
   Returns new_balance of the user in given format
   """
   @spec withdraw(user(), amount(), currency()) :: {:ok, balance()} | {:error, :wrong_arguments | :user_does_not_exist | :not_enough_money | :too_many_requests_to_user}
+  def withdraw("", _amount, _currency), do: {:error, :wrong_arguments}
+  def withdraw(_user, _amount, ""), do: {:error, :wrong_arguments}
+  def withdraw(_user, amount, _currency) when amount <= 0.0, do:
+    {:error, :wrong_arguments}
   def withdraw(user, amount, currency) do
-    {:ok, amount}
+    UserSrv.withdraw(user, amount, currency)
   end
 
 
@@ -57,9 +61,13 @@ defmodule ExBanking do
   Returns balance of the user in given format
   """
   @spec get_balance(user(), currency()) :: {:ok, balance()} | {:error, :wrong_arguments | :user_does_not_exist | :too_many_requests_to_user}
-  def get_balance(user, currency) do
-    {:ok, 0.0}
+  def get_balance("", __currency), do: {:error, :wrong_arguments}
+  def get_balance(_user, ""), do: {:error, :wrong_arguments}
+    {:error, :wrong_arguments}
+  def get_balance(user, currency) when is_binary(user) and is_binary(currency) do
+    UserSrv.get_balance(user, currency)
   end
+  def get_balance(_user, _currency), do: {:error, :wrong_arguments}
 
 
   @doc """
