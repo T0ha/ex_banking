@@ -52,9 +52,13 @@ defmodule ExBanking do
   def withdraw(_user, _amount, ""), do: {:error, :wrong_arguments}
   def withdraw(_user, amount, _currency) when amount <= 0.0, do:
     {:error, :wrong_arguments}
-  def withdraw(user, amount, currency) do
+  def withdraw(user, amount, currency) 
+    when is_binary(user) 
+      and is_binary(currency) 
+      and is_float(amount) do
     UserSrv.withdraw(user, amount, currency)
   end
+  def withdraw(_user, _amount, _currency), do: {:error, :wrong_arguments}
 
 
   @doc """

@@ -48,7 +48,7 @@ defmodule ExBanking.UserSrv do
       [] ->
         {:error, :user_does_not_exist}
       [{^user, pid, counter}] when counter <= 10 ->
-        {:ok, GenServer.call(pid, {:withdraw, currency, amount})}
+        GenServer.call(pid, {:withdraw, currency, amount})
       [{_user, _pid, _counter}] ->
         {:error, :too_many_requests_to_user}
     end
@@ -65,7 +65,7 @@ defmodule ExBanking.UserSrv do
 
   @impl true
   def handle_call({:deposit, currency, amount}, _from, %{balances: balances} = state) do
-    balances = Map.update(balances, currency, amount, fn am -> am + amount end)
+    balances = Map.update(balances, currency, amount, fn am -> Float.round(am + amount, 2) end)
     {:reply, Map.get(balances, currency, 0.0), %{state | balances: balances}}
   end
 
@@ -73,8 +73,13 @@ defmodule ExBanking.UserSrv do
     {:reply, Map.get(balances, currency, 0.0), state}
 
   def handle_call({:withdraw, currency, amount}, _from, %{balances: balances} = state) do
-    balances = Map.update(balances, currency, amount, fn am -> am - amount end)
-    {:reply, Map.get(balances, currency, 0.0), %{state | balances: balances}}
+    case Map.get(balances, currency, 0.0) do
+      balance when balance >= amount ->
+        balances = Map.update(balances, currency, amount, fn am -> Float.round(am - amount, 2) end)
+        {:reply, {:ok, Map.get(balances, currency)}, %{state | balances: balances}}
+      _ ->
+        {:reply, {:error, :not_enough_money}, state}
+    end
   end
 
   def handle_call(req, _from, state) do
